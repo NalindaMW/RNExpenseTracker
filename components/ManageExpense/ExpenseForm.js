@@ -2,13 +2,19 @@ import { useState } from "react";
 import { TextInput, StyleSheet, View } from "react-native";
 import Input from "./Input";
 import Button from "../UI/Button";
+import { getFormattedDate } from "../../utility/date";
 
-function ExpenseForm({ submitButtonLabel, onCancel, onSubmit }) {
+function ExpenseForm({
+  submitButtonLabel,
+  onCancel,
+  onSubmit,
+  selectedExpense,
+}) {
   // one state to manage all input values
   const [inputValues, setInputValues] = useState({
-    amount: "",
-    date: "",
-    description: "",
+    amount: selectedExpense ? selectedExpense.amount.toString() : "",
+    date: selectedExpense ? getFormattedDate(selectedExpense.date) : "",
+    description: selectedExpense ? selectedExpense.description : "",
   });
 
   // generic input changed handler function
@@ -21,7 +27,15 @@ function ExpenseForm({ submitButtonLabel, onCancel, onSubmit }) {
     });
   }
 
-  function submitHandler() {}
+  function submitHandler() {
+    const expenseData = {
+      amount: +inputValues.amount, // + use to convert the string to number
+      date: new Date(inputValues.date),
+      description: inputValues.description,
+    };
+
+    onSubmit(expenseData);
+  }
 
   return (
     <View>

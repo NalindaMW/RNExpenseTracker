@@ -7,10 +7,14 @@ import { ExpensesContext } from "../store/expenses-context";
 import ExpenseForm from "../components/ManageExpense/ExpenseForm";
 
 function ManageExpense({ route, navigation }) {
+  const expensesContext = useContext(ExpensesContext);
+
   const editedExpenseId = route.params?.expenseId; // check for undifined with ? symbol
   const isEditing = !!editedExpenseId; // convert a value into a boolean with !! symbols
 
-  const expensesContext = useContext(ExpensesContext);
+  const selectedExpense = expensesContext.expenses.find(
+    (expense) => expense.id === editedExpenseId
+  );
 
   useLayoutEffect(() => {
     navigation.setOptions({
@@ -25,19 +29,11 @@ function ManageExpense({ route, navigation }) {
   function cancelHandler() {
     navigation.goBack();
   }
-  function confirmHandler() {
+  function confirmHandler(expenseData) {
     if (isEditing) {
-      expensesContext.updateExpense(editedExpenseId, {
-        description: "Test",
-        amount: 19.99,
-        date: new Date("2022-06-21"),
-      });
+      expensesContext.updateExpense(editedExpenseId, expenseData);
     } else {
-      expensesContext.addExpense({
-        description: "Test",
-        amount: 19.99,
-        date: new Date("2022-06-21"),
-      });
+      expensesContext.addExpense(expenseData);
     }
     navigation.goBack();
   }
@@ -47,6 +43,8 @@ function ManageExpense({ route, navigation }) {
       <ExpenseForm
         submitButtonLabel={isEditing ? "Update" : "Add"}
         onCancel={cancelHandler}
+        onSubmit={confirmHandler}
+        selectedExpense={selectedExpense}
       />
 
       {isEditing && (
