@@ -1,11 +1,16 @@
 import { View, TextInput, Text, StyleSheet } from "react-native";
 import { GlobalStyles } from "../../constants/styles";
 
-function Input({ label, type, maxLength, textInputConfigs }) {
+function Input({ label, isValid, type, maxLength, textInputConfigs }) {
   return (
     <View style={styles.inputContainer}>
-      <Text style={styles.label}>{label}</Text>
-      <TextInput style={styles.input} {...textInputConfigs} />
+      <Text style={[styles.label, !isValid && styles.invalidLabel]}>
+        {label}
+      </Text>
+      <TextInput
+        style={[styles.input, !isValid && styles.invalidInput]}
+        {...textInputConfigs}
+      />
       {/* <TextInput keyboardType={type} maxLength={maxLength} /> */}
     </View>
   );
@@ -29,5 +34,11 @@ const styles = StyleSheet.create({
     padding: 6,
     borderRadius: 6,
     fontSize: 18,
+  },
+  invalidLabel: {
+    color: GlobalStyles.colors.error500,
+  },
+  invalidInput: {
+    backgroundColor: GlobalStyles.colors.error50,
   },
 });
