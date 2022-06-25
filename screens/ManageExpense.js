@@ -7,9 +7,12 @@ import { ExpensesContext } from "../store/expenses-context";
 import ExpenseForm from "../components/ManageExpense/ExpenseForm";
 import { deleteExpense, storeExpense, updateExpense } from "../utility/http";
 import LoadingOverlay from "../components/UI/LoadingOverlay";
+import ErrorOverlay from "../components/UI/ErrorOverlay";
 
 function ManageExpense({ route, navigation }) {
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState();
+
   const expensesContext = useContext(ExpensesContext);
 
   const editedExpenseId = route.params?.expenseId; // check for undifined with ? symbol
@@ -30,25 +33,46 @@ function ManageExpense({ route, navigation }) {
   }
 
   async function deleteExpenseHandler() {
-    expensesContext.deleteExpense(editedExpenseId);
     setIsLoading(true);
-    await deleteExpense(editedExpenseId);
-    // setIsLoading(false); // No need to set to false bcs screen is already dismissing
-    navigation.goBack();
+    try {
+      await deleteExpense(editedExpenseId);
+      expensesContext.deleteExpense(editedExpenseId);
+
+      navigation.goBack();
+    } catch (error) {
+      setError("Something went wrong!");
+      setIsLoading(false);
+    }
   }
+
   function cancelHandler() {
     navigation.goBack();
   }
+
   async function confirmHandler(expenseData) {
     setIsLoading(true);
-    if (isEditing) {
-      expensesContext.updateExpense(editedExpenseId, expenseData);
-      await updateExpense(editedExpenseId, expenseData);
-    } else {
-      const id = await storeExpense(expenseData);
-      expensesContext.addExpense({ ...expenseData, id: id });
+    try {
+      if (isEditing) {
+        expensesContext.updateExpense(editedExpenseId, expenseData);
+        await updateExpense(editedExpenseId, expenseData);
+      } else {
+        const id = await storeExpense(expenseData);
+        expensesContext.addExpense({ ...expenseData, id: id });
+      }
+      navigation.goBack();
+    } catch (error) {
+      setError("Something went wrong!");
+      setIsLoading(false);
     }
+  }
+
+  function errorHandler() {
+    // setError(null);
     navigation.goBack();
+  }
+
+  if (error && !isLoading) {
+    return <ErrorOverlay message={error} onConfirm={errorHandler} />;
   }
 
   return (
